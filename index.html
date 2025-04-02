@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide | Aletur</title>
+    <!-- Importando fontes do Google Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+            font-family: 'Poppins', sans-serif;
+        }
+       
+        .slideshow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+       
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+       
+        .slide.active {
+            opacity: 1;
+        }
+       
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 40px;
+            box-sizing: border-box;
+            z-index: 10;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .logo-container {
+            margin-bottom: 15px;
+        }
+
+        .titulo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3.8rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 15px rgba(0,0,0,0.7);
+            position: relative;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .titulo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 0;
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, #4ec5f7);
+        }
+
+        .subtitulo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: #f8f8f8;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 1px 1px 8px rgba(0,0,0,0.6);
+        }
+
+        .data-hora {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            color: white;
+            text-shadow: 1px 1px 8px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            background-color: rgba(0,0,0,0.4);
+            padding: 8px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+        }
+
+        .data-hora i {
+            margin-right: 10px;
+            color: #4ec5f7;
+        }
+
+        /* Controles de navegação */
+        .controls {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            display: flex;
+            gap: 15px;
+            z-index: 20;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .control-btn:hover {
+            background-color: rgba(78, 197, 247, 0.7);
+        }
+
+        /* Indicador de slide */
+        .slide-indicator {
+            position: absolute;
+            bottom: 110px;
+            left: 40px;
+            z-index: 20;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            max-width: 80%;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+        }
+
+        .dot.active {
+            background-color: #4ec5f7;
+            width: 25px;
+            border-radius: 10px;
+        }
+
+        /* Adiciona uma imagem padrão bonita caso não tenha imagens na pasta */
+        .default-bg {
+            background-image: url('/api/placeholder/1920/1080');
+            background-size: cover;
+            background-position: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Status de carregamento */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            background: rgba(0,0,0,0.7);
+            padding: 20px 30px;
+            border-radius: 10px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">Carregando imagens...</div>
+    
+    <div class="slideshow" id="slideshow">
+        <!-- As imagens serão inseridas aqui pelo JavaScript -->
+    </div>
+
+    <div class="overlay">
+        <div class="logo-container">
+            <!-- Logo opcional aqui -->
+        </div>
+        <div class="titulo">ALEXANDRE TURISMO</div>
+        <div class="subtitulo">Experiências Inesquecíveis</div>
+        <div class="data-hora" id="dataHora"><i class="far fa-clock"></i></div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+        <button class="control-btn" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <div class="slide-indicator" id="slideIndicator">
+        <!-- Indicadores de slide serão inseridos aqui pelo JavaScript -->
+    </div>
+
+    <script>
+        // Lista extensa de possíveis imagens
+        const listaCompletaDeImagens = [
+            './fotos/1.png',
+            './fotos/2.png',
+            './fotos/3.png',
+            './fotos/4.png',
+            './fotos/5.png',
+            './fotos/6.png',
+            './fotos/7.png',
+            './fotos/8.png',
+            './fotos/9.png',
+            './fotos/10.png',
+            './fotos/11.png',
+            './fotos/12.png',
+            './fotos/13.png',
+            './fotos/14.png',
+            './fotos/15.png',
+            './fotos/16.png',
+            './fotos/17.png',
+            './fotos/18.png',
+            './fotos/19.png',
+            './fotos/20.png',
+            // Adicione quantas imagens quiser aqui
+        ];
+        
+        let slideAtual = 0;
+        const tempoExibicao = 60000; // 1 minuto em milissegundos
+        let imagensValidadas = [];
+        let temporizador;
+        
+        // Função para verificar se uma imagem existe
+        function verificarImagem(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(url);
+                img.onerror = () => reject();
+                img.src = url;
+            });
+        }
+        
+        // Função assíncrona para carregar apenas imagens que existem
+        async function carregarImagens() {
+            const imagens = [];
+            
+            for (const url of listaCompletaDeImagens) {
+                try {
+                    await verificarImagem(url);
+                    imagens.push(url);
+                    console.log(`Imagem carregada com sucesso: ${url}`);
+                } catch (error) {
+                    console.log(`Imagem não encontrada: ${url}`);
+                    // Simplesmente pula esta imagem
+                }
+            }
+            
+            return imagens;
+        }
+       
+        // Função para criar os slides
+        function criarSlides() {
+            const slideshow = document.getElementById('slideshow');
+            const slideIndicator = document.getElementById('slideIndicator');
+            
+            // Limpar conteúdo anterior, se houver
+            slideshow.innerHTML = '';
+            slideIndicator.innerHTML = '';
+            
+            if (imagensValidadas.length === 0) {
+                // Se não houver imagens, criar um fundo padrão
+                const defaultSlide = document.createElement('div');
+                defaultSlide.className = 'slide active';
+                const defaultBg = document.createElement('div');
+                defaultBg.className = 'default-bg';
+                defaultSlide.appendChild(defaultBg);
+                slideshow.appendChild(defaultSlide);
+                
+                // Remover indicadores de loading
+                document.getElementById('loading').style.display = 'none';
+                return;
+            }
+           
+            imagensValidadas.forEach((img, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                if (index === 0) slide.classList.add('active');
+               
+                const imagem = document.createElement('img');
+                imagem.src = img;
+                imagem.alt = 'Alexandre Turismo';
+               
+                slide.appendChild(imagem);
+                slideshow.appendChild(slide);
+                
+                // Criar indicador para este slide
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (index === 0) dot.classList.add('active');
+                slideIndicator.appendChild(dot);
+            });
+            
+            // Remover indicadores de loading
+            document.getElementById('loading').style.display = 'none';
+        }
+       
+        // Função para avançar para o próximo slide
+        function proximoSlide() {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            if (slides.length <= 1) return;
+           
+            slides[slideAtual].classList.remove('active');
+            dots[slideAtual].classList.remove('active');
+            slideAtual = (slideAtual + 1) % slides.length;
+            slides[slideAtual].classList.add('active');
+            dots[slideAtual].classList.add('active');
+            
+            // Reiniciar o temporizador
+            clearInterval(temporizador);
+            temporizador = setInterval(proximoSlide, tempoExibicao);
+        }
+
+        // Função para voltar ao slide anterior
+        function slideAnterior() {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            if (slides.length <= 1) return;
+           
+            slides[slideAtual].classList.remove('active');
+            dots[slideAtual].classList.remove('active');
+            slideAtual = (slideAtual - 1 + slides.length) % slides.length;
+            slides[slideAtual].classList.add('active');
+            dots[slideAtual].classList.add('active');
+            
+            // Reiniciar o temporizador
+            clearInterval(temporizador);
+            temporizador = setInterval(proximoSlide, tempoExibicao);
+        }
+
+        // Função para atualizar data e hora
+        function atualizarDataHora() {
+            const agora = new Date();
+            
+            const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+            const diaSemana = diasSemana[agora.getDay()];
+            
+            const dia = agora.getDate().toString().padStart(2, '0');
+            const mes = (agora.getMonth() + 1).toString().padStart(2, '0');
+            const ano = agora.getFullYear();
+            
+            const hora = agora.getHours().toString().padStart(2, '0');
+            const minutos = agora.getMinutes().toString().padStart(2, '0');
+            const segundos = agora.getSeconds().toString().padStart(2, '0');
+            
+            const dataHoraTexto = `${diaSemana}, ${dia}/${mes}/${ano} - ${hora}:${minutos}:${segundos}`;
+            document.getElementById('dataHora').innerHTML = `<i class="far fa-clock"></i>${dataHoraTexto}`;
+        }
+       
+        // Inicializar o slideshow
+        window.onload = async function() {
+            // Carregar e validar imagens
+            document.getElementById('loading').textContent = 'Verificando imagens...';
+            imagensValidadas = await carregarImagens();
+            document.getElementById('loading').textContent = 'Preparando slideshow...';
+            
+            // Criar slides com as imagens validadas
+            criarSlides();
+            
+            // Se houver imagens válidas, iniciar o slideshow
+            if (imagensValidadas.length > 0) {
+                temporizador = setInterval(proximoSlide, tempoExibicao);
+            }
+            
+            // Configurar botões de navegação
+            document.getElementById('nextBtn').addEventListener('click', proximoSlide);
+            document.getElementById('prevBtn').addEventListener('click', slideAnterior);
+            
+            // Atualizar data e hora a cada segundo
+            atualizarDataHora();
+            setInterval(atualizarDataHora, 1000);
+           
+            // Entrar em modo de tela cheia quando possível
+            document.addEventListener('click', function(e) {
+                // Evitar entrar em tela cheia ao clicar nos controles
+                if (e.target.closest('.controls') || e.target.closest('.dot')) return;
+                
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                }
+            });
+        };
+    </script>
+</body>
+</html>
