@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>alexandreturr // slide</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%231E90FF'/%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Ubuntu:wght@400;500;700&family=Dancing+Script:wght@700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4ec5f7;
+            --primary-hover: #3ab7ea;
+            --text-light: #f8f8f8;
+            --overlay-gradient: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%);
+            --transition-normal: all 0.3s ease;
+            --transition-slow: all 0.5s ease-in-out;
+            --shadow-text: 2px 2px 15px rgba(0,0,0,0.7);
+            --control-bg: rgba(255, 255, 255, 0.15);
+            --control-hover: rgba(78, 197, 247, 0.8);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+            font-family: 'Poppins', sans-serif;
+        }
+       
+        .slideshow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+       
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+       
+        .slide.active {
+            opacity: 1;
+            z-index: 2;
+        }
+       
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.9);
+        }
+
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 60px 40px 40px;
+            box-sizing: border-box;
+            z-index: 10;
+            background: var(--overlay-gradient);
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .logo-container {
+            margin-bottom: 20px;
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .logo {
+            height: 60px;
+            width: auto;
+        }
+
+        .titulo-container {
+            position: relative;
+            margin-bottom: 5px;
+        }
+
+        .titulo {
+            font-family: 'Dancing Script', cursive;
+            font-size: 4rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: var(--shadow-text);
+            position: relative;
+            display: inline-block;
+            letter-spacing: 1px;
+        }
+
+        .titulo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 0;
+            width: 70%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--primary-color));
+            animation: expandWidth 1.5s ease-out forwards;
+        }
+
+        @keyframes expandWidth {
+            from { width: 0; }
+            to { width: 70%; }
+        }
+
+        .subtitulo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 300;
+            color: var(--text-light);
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            text-shadow: 1px 1px 8px rgba(0,0,0,0.6);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-out 0.5s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .data-hora {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 1px 1px 8px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px 25px;
+            border-radius: 30px;
+            backdrop-filter: blur(8px);
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            transform: translateY(20px);
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .data-hora i {
+            margin-right: 12px;
+            color: var(--primary-color);
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            display: flex;
+            gap: 15px;
+            z-index: 20;
+        }
+
+        .control-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background-color: var(--control-bg);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-normal);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .control-btn:hover {
+            background-color: var(--control-hover);
+            transform: scale(1.05);
+        }
+
+        .control-btn:active {
+            transform: scale(0.98);
+        }
+
+        .slide-indicator {
+            position: absolute;
+            bottom: 120px;
+            left: 40px;
+            z-index: 20;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            max-width: 80%;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4);
+            transition: var(--transition-normal);
+            margin-bottom: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .dot:hover {
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .dot.active {
+            background-color: var(--primary-color);
+            width: 28px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(78, 197, 247, 0.5);
+        }
+
+        .default-bg {
+            background-image: url('/api/placeholder/1920/1080');
+            background-size: cover;
+            background-position: center;
+            width: 100%;
+            height: 100%;
+            filter: brightness(0.8);
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            background: rgba(0,0,0,0.8);
+            padding: 20px 30px;
+            border-radius: 15px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            min-width: 200px;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .loading .spinner {
+            margin-right: 15px;
+            width: 25px;
+            height: 25px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .slide-caption {
+            position: absolute;
+            bottom: 200px;
+            left: 40px;
+            z-index: 20;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 8px;
+            max-width: 50%;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: var(--transition-slow);
+            backdrop-filter: blur(8px);
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: none;
+        }
+
+        .slide-caption.active {
+            opacity: 1;
+            transform: translateX(0);
+            display: block;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 5px;
+            width: 0%;
+            background-color: var(--primary-color);
+            z-index: 30;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(78, 197, 247, 0.7);
+        }
+
+        @media (max-width: 768px) {
+            .titulo {
+                font-size: 3rem;
+            }
+            
+            .subtitulo {
+                font-size: 1rem;
+                letter-spacing: 3px;
+            }
+            
+            .data-hora {
+                font-size: 1.1rem;
+                padding: 8px 15px;
+            }
+            
+            .controls {
+                bottom: 30px;
+                left: 30px;
+            }
+            
+            .slide-indicator {
+                bottom: 100px;
+                left: 30px;
+            }
+            
+            .overlay {
+                padding: 40px 30px 30px;
+            }
+            
+            .slide-caption {
+                bottom: 150px;
+                left: 30px;
+                max-width: 70%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .titulo {
+                font-size: 2.5rem;
+            }
+            
+            .subtitulo {
+                font-size: 0.9rem;
+                letter-spacing: 2px;
+            }
+            
+            .control-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 16px;
+            }
+            
+            .slide-caption {
+                max-width: 90%;
+                font-size: 0.9rem;
+            }
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: var(--control-bg);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-normal);
+            backdrop-filter: blur(8px);
+            z-index: 50;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .fullscreen-btn:hover {
+            background-color: var(--control-hover);
+        }
+
+        .pagination-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background-color: rgba(0,0,0,0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 20;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <span>Carregando imagens...</span>
+    </div>
+    
+    <div class="slideshow" id="slideshow">
+        <!-- As imagens serão inseridas aqui pelo JavaScript -->
+    </div>
+
+    <div class="overlay">
+        <div class="logo-container">
+            <!-- Logo poderia ser inserida aqui -->
+        </div>
+        <div class="titulo-container">
+            <div class="titulo">Alexandre Fretamento e Turismo</div>
+        </div>
+        <div class="subtitulo">Experiências Inesquecíveis</div>
+        <div class="data-hora" id="dataHora"><i class="far fa-clock"></i></div>
+    </div>
+
+    <button class="fullscreen-btn" id="fullscreenBtn"><i class="fas fa-expand"></i></button>
+    
+    <div class="pagination-info" id="paginationInfo">1 / 1</div>
+
+    <div class="controls">
+        <button class="control-btn" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+        <button class="control-btn" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <div class="slide-indicator" id="slideIndicator">
+        <!-- Indicadores de slide serão inseridos aqui pelo JavaScript -->
+    </div>
+
+    <div class="slide-caption" id="slideCaption"></div>
+    
+    <div class="progress-bar" id="progressBar"></div>
+
+    <script>
+        const listaCompletaDeImagens = [
+            './fotos/1.png',
+            './fotos/2.png',
+            './fotos/3.png',
+            './fotos/4.png',
+            './fotos/5.png',
+            './fotos/6.png',
+            './fotos/7.png',
+            './fotos/8.png',
+            './fotos/9.png',
+            './fotos/10.png',
+            './fotos/11.png',
+            './fotos/12.png',
+            './fotos/13.png',
+            './fotos/14.png',
+            './fotos/15.png',
+            './fotos/16.png',
+            './fotos/17.png',
+            './fotos/18.png',
+            './fotos/19.png',
+            './fotos/20.png'
+        ];
+        
+        const legendasImagens = [
+            "Conforto e segurança em cada viagem",
+            "Destinos incríveis pelo Brasil",
+            "Frota moderna e bem equipada",
+            "Profissionais experientes e qualificados",
+            "Atendimento personalizado",
+            "Viagens corporativas e escolares",
+            "Translados para eventos e aeroportos",
+            "Descubra lugares maravilhosos",
+            "Viagens planejadas com cuidado",
+            "Conheça o Brasil com conforto",
+            "Ônibus executivos e convencionais",
+            "Vans e micro-ônibus disponíveis",
+            "Pacotes turísticos personalizados",
+            "Segurança em primeiro lugar",
+            "Experiências inesquecíveis",
+            "Viaje com quem entende",
+            "Qualidade garantida em cada detalhe",
+            "Pontualidade e compromisso",
+            "Conforto em cada kilômetro",
+            "Seu destino, nossa responsabilidade"
+        ];
+        
+        let slideAtual = 0;
+        const tempoExibicao = 60000;
+        let imagensValidadas = [];
+        let temporizador;
+        let progressInterval;
+        let isFullscreen = false;
+        
+        function verificarImagem(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(url);
+                img.onerror = () => reject();
+                img.src = url;
+            });
+        }
+        
+        async function carregarImagens() {
+            const imagens = [];
+            let countLoaded = 0;
+            const totalImages = listaCompletaDeImagens.length;
+            
+            document.getElementById('loading').innerHTML = 
+                `<div class="spinner"></div><span>Verificando imagens (0/${totalImages})...</span>`;
+            
+            for (const [index, url] of listaCompletaDeImagens.entries()) {
+                try {
+                    await verificarImagem(url);
+                    imagens.push({
+                        url: url,
+                        legenda: legendasImagens[index] || "Alexandre Fretamento e Turismo"
+                    });
+                    countLoaded++;
+                    document.getElementById('loading').innerHTML = 
+                        `<div class="spinner"></div><span>Verificando imagens (${countLoaded}/${totalImages})...</span>`;
+                } catch (error) {
+                    console.log(`Imagem não encontrada: ${url}`);
+                }
+            }
+            
+            return imagens;
+        }
+       
+        function criarSlides() {
+            const slideshow = document.getElementById('slideshow');
+            const slideIndicator = document.getElementById('slideIndicator');
+            const slideCaption = document.getElementById('slideCaption');
+            
+            slideshow.innerHTML = '';
+            slideIndicator.innerHTML = '';
+            
+            if (imagensValidadas.length === 0) {
+                const defaultSlide = document.createElement('div');
+                defaultSlide.className = 'slide active';
+                const defaultBg = document.createElement('div');
+                defaultBg.className = 'default-bg';
+                defaultSlide.appendChild(defaultBg);
+                slideshow.appendChild(defaultSlide);
+                
+                slideCaption.textContent = "Bem-vindo à Alexandre Fretamento e Turismo";
+                slideCaption.classList.add('active');
+                
+                document.getElementById('paginationInfo').textContent = "1 / 1";
+                document.getElementById('loading').style.display = 'none';
+                return;
+            }
+           
+            imagensValidadas.forEach((imgObj, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                if (index === 0) slide.classList.add('active');
+               
+                const imagem = document.createElement('img');
+                imagem.src = imgObj.url;
+                imagem.alt = `Alexandre Turismo - ${imgObj.legenda}`;
+                imagem.loading = "lazy";
+               
+                slide.appendChild(imagem);
+                slideshow.appendChild(slide);
+                
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (index === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => irParaSlide(index));
+                slideIndicator.appendChild(dot);
+            });
+            
+            document.getElementById('paginationInfo').textContent = `1 / ${imagensValidadas.length}`;
+            
+            if (imagensValidadas.length > 0) {
+                slideCaption.textContent = imagensValidadas[0].legenda;
+                slideCaption.classList.add('active');
+                iniciarBarraProgresso();
+            }
+            
+            document.getElementById('loading').style.display = 'none';
+        }
+       
+        function proximoSlide() {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            if (slides.length <= 1) return;
+           
+            slides[slideAtual].classList.remove('active');
+            dots[slideAtual].classList.remove('active');
+            document.getElementById('slideCaption').classList.remove('active');
+            
+            slideAtual = (slideAtual + 1) % slides.length;
+            
+            setTimeout(() => {
+                slides[slideAtual].classList.add('active');
+                dots[slideAtual].classList.add('active');
+                
+                if (imagensValidadas.length > 0) {
+                    const slideCaption = document.getElementById('slideCaption');
+                    slideCaption.textContent = imagensValidadas[slideAtual].legenda;
+                    slideCaption.classList.add('active');
+                }
+                
+                document.getElementById('paginationInfo').textContent = `${slideAtual + 1} / ${slides.length}`;
+                iniciarBarraProgresso();
+            }, 200);
+            
+            clearInterval(temporizador);
+            temporizador = setInterval(proximoSlide, tempoExibicao);
+        }
+
+        function slideAnterior() {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            if (slides.length <= 1) return;
+           
+            slides[slideAtual].classList.remove('active');
+            dots[slideAtual].classList.remove('active');
+            document.getElementById('slideCaption').classList.remove('active');
+            
+            slideAtual = (slideAtual - 1 + slides.length) % slides.length;
+            
+            setTimeout(() => {
+                slides[slideAtual].classList.add('active');
+                dots[slideAtual].classList.add('active');
+                
+                if (imagensValidadas.length > 0) {
+                    const slideCaption = document.getElementById('slideCaption');
+                    slideCaption.textContent = imagensValidadas[slideAtual].legenda;
+                    slideCaption.classList.add('active');
+                }
+                
+                document.getElementById('paginationInfo').textContent = `${slideAtual + 1} / ${slides.length}`;
+                iniciarBarraProgresso();
+            }, 200);
+            
+            clearInterval(temporizador);
+            temporizador = setInterval(proximoSlide, tempoExibicao);
+        }
+        
+        function irParaSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            if (slides.length <= 1 || index === slideAtual) return;
+            
+            slides[slideAtual].classList.remove('active');
+            dots[slideAtual].classList.remove('active');
+            document.getElementById('slideCaption').classList.remove('active');
+            
+            slideAtual = index;
+            
+            setTimeout(() => {
+                slides[slideAtual].classList.add('active');
+                dots[slideAtual].classList.add('active');
+                
+                if (imagensValidadas.length > 0) {
+                    const slideCaption = document.getElementById('slideCaption');
+                    slideCaption.textContent = imagensValidadas[slideAtual].legenda;
+                    slideCaption.classList.add('active');
+                }
+                
+                document.getElementById('paginationInfo').textContent = `${slideAtual + 1} / ${slides.length}`;
+                iniciarBarraProgresso();
+            }, 200);
+            
+            clearInterval(temporizador);
+            temporizador = setInterval(proximoSlide, tempoExibicao);
+        }
+
+        function atualizarDataHora() {
+            const agora = new Date();
+            
+            const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+            const diaSemana = diasSemana[agora.getDay()];
+            
+            const dia = agora.getDate().toString().padStart(2, '0');
+            const mes = (agora.getMonth() + 1).toString().padStart(2, '0');
+            const ano = agora.getFullYear();
+            
+            const hora = agora.getHours().toString().padStart(2, '0');
+            const minutos = agora.getMinutes().toString().padStart(2, '0');
+            const segundos = agora.getSeconds().toString().padStart(2, '0');
+            
+            const dataHoraTexto = `${diaSemana}, ${dia}/${mes}/${ano} - ${hora}:${minutos}:${segundos}`;
+            document.getElementById('dataHora').innerHTML = `<i class="far fa-clock"></i>${dataHoraTexto}`;
+        }
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                }
+                isFullscreen = true;
+                document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                isFullscreen = false;
+                document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        }
+        
+        function iniciarBarraProgresso() {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = '0%';
+            
+            clearInterval(progressInterval);
+            
+            const intervaloAtualizacao = 100;
+            const totalSteps = tempoExibicao / intervaloAtualizacao;
+            let currentStep = 0;
+            
+            progressInterval = setInterval(() => {
+                currentStep++;
+                const progresso = (currentStep / totalSteps) * 100;
+                progressBar.style.width = `${progresso}%`;
+                
+                if (currentStep >= totalSteps) {
+                    clearInterval(progressInterval);
+                }
+            }, intervaloAtualizacao);
+        }
+       
+        window.onload = async function() {
+            document.getElementById('loading').innerHTML = 
+                '<div class="spinner"></div><span>Verificando imagens...</span>';
+            imagensValidadas = await carregarImagens();
+            document.getElementById('loading').innerHTML = 
+                '<div class="spinner"></div><span>Preparando slideshow...</span>';
+            
+            criarSlides();
+            
+            if (imagensValidadas.length > 0) {
+                temporizador = setInterval(proximoSlide, tempoExibicao);
+                iniciarBarraProgresso();
+            }
+            
+            document.getElementById('nextBtn').addEventListener('click', proximoSlide);
+            document.getElementById('prevBtn').addEventListener('click', slideAnterior);
+            document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+            
+            atualizarDataHora();
+            setInterval(atualizarDataHora, 1000);
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowRight') {
+                    proximoSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    slideAnterior();
+                } else if (e.key === 'f' || e.key === 'F') {
+                    toggleFullscreen();
+                }
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.controls') || 
+                    e.target.closest('.dot') || 
+                    e.target.closest('.fullscreen-btn')) return;
+                
+                const screenWidth = window.innerWidth;
+                const clickX = e.clientX;
+                
+                if (clickX > screenWidth * 0.6) {
+                    proximoSlide();
+                } else if (clickX < screenWidth * 0.4) {
+                    slideAnterior();
+                }
+            });
+        };
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                isFullscreen = false;
+                document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+    </script>
+</body>
+</html>
